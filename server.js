@@ -22,28 +22,36 @@ function mainMenu() {
                 type: "list",
                 message: "What would you like to do?",
                 choices: [
-                    "View All Employees",
-                    "View All Employees by Department",
-                    "Return songs within position range",
-                    "Search for song",
-                    "Search for artist's top albums",
+                    // "View All Employees",
+                    // "View All Employees by Department",
+                    // "View All Employees by Manager",
+                    // "Add Employee",
+                    // "Remove Employee",
+                    // "Update Employee",
+                    // "Update Employee Role",
+                    "View Departments",
+                    "View Roles",
+                    "View Employees",
+                    "Add Departments",
+                    "Add Roles",
+                    "Add Employees",
+                    "Update Employee Roles",
                     "EXIT"],
-                name: "choice",
+                name: "action",
             },
         ])
         .then(answers => {
-            if (answers.choice === "Return all songs by artist") {
-                artistQuery();
-            } else if (answers.choice === "Return artists with more than one song listed") {
-                repeatArtist();
-            } else if (answers.choice === "Return songs within position range") {
-                searchSongWithinRange();
-            } else if (answers.choice === "Search for song") {
-                searchSong();
-            } else if (answers.choice === "Search for artist's top albums") {
-                topSongAlbum();
-            } else {
-                connection.end();
+            switch (answers.action) {
+                case "View Departments":
+                    viewDepartments();
+                    mainMenu();
+                    break;
+                case "View Roles":
+                    // viewRoles();
+                    mainMenu();
+                    break;
+                default:
+                    connection.end();
             }
         });
 }
