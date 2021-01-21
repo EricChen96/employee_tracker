@@ -33,7 +33,7 @@ function mainMenu() {
                     "View Departments",
                     "View Roles",
                     "View Employees",
-                    "Add Departments",
+                    "Add Department",
                     "Add Roles",
                     "Add Employees",
                     "Update Employee Roles",
@@ -52,6 +52,15 @@ function mainMenu() {
                 case "View Employees":
                     viewEmployees();
                     break;
+                case "Add Department":
+                    addDepartment();
+                    break;
+                case "Add Role":
+                    addRole();
+                    break;
+                // case "Add Employee":
+                //     addEmployee();
+                //     break;
                 default:
                     connection.end();
             }
@@ -92,4 +101,76 @@ function viewEmployees() {
             mainMenu();
         }
     });
+}
+
+function addDepartment() {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                message: "What is the id of the department?",
+                name: "id",
+            },
+            {
+                type: "input",
+                message: "What is the name of the new department?",
+                name: "name",
+            },
+        ])
+        .then(answers => {
+            connection.query(
+                "INSERT INTO departments SET ?", 
+                answers,
+                function (err, res) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
+                    mainMenu();
+                }
+            });
+        });
+}
+let departmentList = [];
+function updateDepartmentList() {
+
+}
+
+function addRole() {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                message: "What is the id of the role?",
+                name: "id",
+            },
+            {
+                type: "input",
+                message: "What is the title of the new role?",
+                name: "title",
+            },
+            {
+                type: "input",
+                message: "What is the salary of the new role?",
+                name: "salary",
+            },
+            {
+                type: "input",
+                message: "What is the department ID of the new role?",
+                name: "title",
+            },
+        ])
+        .then(answers => {
+            connection.query(
+                "INSERT INTO departments SET ?", 
+                answers,
+                function (err, res) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
+                    mainMenu();
+                }
+            });
+        });
 }
