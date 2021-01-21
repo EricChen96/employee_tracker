@@ -2,7 +2,6 @@ const inquirer = require("inquirer");
 const mysql = require("mysql");
 require("console.table");
 
-let managerList = [];
 let departmentList = [];
 let roleList = [];
 let employeeList = [];
@@ -25,7 +24,7 @@ connection.connect((err) => {
 function mainMenu() {
     // prompt user choice for post, bid, or exit
     updateDepartmentList();
-    updateManagerList();
+    // updateManagerList();
     updateRoleList();
     updateEmployeeList();
     inquirer
@@ -44,11 +43,14 @@ function mainMenu() {
                     "View Departments",
                     "View Roles",
                     "View Employees",
+                    "View Employees By Roles",
+                    "View Employees By Departments",
                     "Add Department",
                     "Add Role",
                     "Add Employee",
-                    "Update Employee",
+                    "Update Department",
                     "Update Employee Roles",
+                    "Update Employee",
                     "EXIT"],
                 name: "action",
             },
@@ -64,6 +66,12 @@ function mainMenu() {
                 case "View Employees":
                     viewEmployees();
                     break;
+                case "View Employees By Roles":
+                    viewEmployeesByRoles();
+                    break;
+                // case "View Employees By Departments":
+                //     viewEmployeesByDepartments();
+                //     break;
                 case "Add Department":
                     addDepartment();
                     break;
@@ -73,11 +81,14 @@ function mainMenu() {
                 case "Add Employee":
                     addEmployee();
                     break;
-                case "Update Employee":
-                    updateEmployee();
+                case "Update Department":
+                    updateDepartment();
                     break;
                 case "Update Employee Roles":
                     updateEmployeeRoles();
+                    break;
+                case "Update Employee":
+                    updateEmployee();
                     break;
                 default:
                     connection.end();
@@ -92,8 +103,8 @@ function viewDepartments() {
         } else {
             console.log("");
             console.table(res);
-            mainMenu();
         }
+        mainMenu();
     });
 }
 
@@ -104,20 +115,21 @@ function viewRoles() {
         } else {
             console.log("");
             console.table(res);
-            mainMenu();
         }
+        mainMenu();
     });
 }
-
+// SELECT e.first_name, e.last_name, CONCAT(m.first_name," ", m.last_name) AS manager FROM employees AS e 
+// LEFT JOIN employees AS m ON e.manager_id = m.id;
 function viewEmployees() {
-    connection.query("SELECT * FROM employees", function (err, res) {
+    connection.query("SELECT employees.id, employees.first_name, employees.last_name, employees.role_id,  FROM employees", function (err, res) {
         if (err) {
             console.log(err);
         } else {
             console.log("");
             console.table(res);
-            mainMenu();
         }
+        mainMenu();
     });
 }
 
@@ -144,8 +156,8 @@ function addDepartment() {
                         console.log(err);
                     } else {
                         console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
-                        mainMenu();
                     }
+                    mainMenu();
                 });
         });
 }
@@ -201,31 +213,31 @@ function updateEmployeeList() {
     });
 }
 
-function updateManagerList() {
-    connection.query("SELECT * FROM managers", function (err, res) {
-        if (err) {
-            console.log(err);
-        } else {
-            managerList = [];
-            if (res.length < 1) {
-                let manager = {
-                    name: "No Manager",
-                    value: null
-                };
-                managerList.push(manager);
-            }
-            else {
-                res.forEach(element => {
-                    let manager = {
-                        name: `${element.id}. ${element.first_name} ${element.last_name}`,
-                        value: element.id
-                    };
-                    managerList.push(manager);
-                });
-            }
-        }
-    });
-}
+// function updateManagerList() {
+//     connection.query("SELECT * FROM managers", function (err, res) {
+//         if (err) {
+//             console.log(err);
+//         } else {
+//             managerList = [];
+//             if (res.length < 1) {
+//                 let manager = {
+//                     name: "No Manager",
+//                     value: null
+//                 };
+//                 managerList.push(manager);
+//             }
+//             else {
+//                 res.forEach(element => {
+//                     let manager = {
+//                         name: `${element.id}. ${element.first_name} ${element.last_name}`,
+//                         value: element.id
+//                     };
+//                     managerList.push(manager);
+//                 });
+//             }
+//         }
+//     });
+// }
 
 function addRole() {
     inquirer
@@ -261,8 +273,8 @@ function addRole() {
                         console.log(err);
                     } else {
                         console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
-                        mainMenu();
                     }
+                    mainMenu();
                 });
         });
 }
@@ -293,8 +305,8 @@ function addEmployee() {
             },
             {
                 type: "list",
-                message: "What is the manager ID of the new role?",
-                choices: managerList,
+                message: "What is the employee ID for the manager of the employee?",
+                choices: addNullManagerOption(employeeList),
                 name: "manager_id",
             },
         ])
@@ -307,10 +319,19 @@ function addEmployee() {
                         console.log(err);
                     } else {
                         console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
-                        mainMenu();
                     }
+                    mainMenu();
                 });
         });
+}
+
+function addNullManagerOption(array) {
+    let noManager = {
+        name: "No Manager",
+        value: null
+    };
+    array.push(noManager);
+    return array;
 }
 
 function updateEmployee() {
@@ -318,13 +339,13 @@ function updateEmployee() {
         .prompt([
             {
                 type: "list",
-                message: "Which employee do you want to update?",
+                message: "Which employee ID do you want to update?",
                 choices: employeeList,
                 name: "updatedEmployeeID",
             },
             {
                 type: "input",
-                message: "What is the new ID of the employee?",
+                message: "What is the UPDATED ID of the employee?",
                 name: "id",
             },
             {
@@ -346,7 +367,7 @@ function updateEmployee() {
             {
                 type: "list",
                 message: "What is the UPDATED manager ID of the employee?",
-                choices: managerList,
+                choices: addNullManagerOption(employeeList),
                 name: "manager_id",
             },
         ])
@@ -366,8 +387,8 @@ function updateEmployee() {
                         console.log(err);
                     } else {
                         console.log(`Successfully updated to ${answers.id}. ${answers.first_name} ${answers.last_name} - Role ID: ${answers.role_id} - Manager ID: ${answers.manager_id}`);
-                        mainMenu();
                     }
+                    mainMenu();
                 });
         });
 }
@@ -382,22 +403,22 @@ function updateEmployeeRoles() {
             },
             {
                 type: "input",
-                message: "What is the new ID of the role?",
+                message: "What is the UPDATED ID of the role?",
                 name: "id",
             },
             {
                 type: "input",
-                message: "What is the new title of the role?",
+                message: "What is the UPDATED title of the role?",
                 name: "title",
             },
             {
                 type: "input",
-                message: "What is the new salary of the role?",
+                message: "What is the UPDATED salary of the role?",
                 name: "salary",
             },
             {
                 type: "list",
-                message: "What is the new department ID of the role?",
+                message: "What is the UPDATED department ID of the role?",
                 choices: departmentList,
                 name: "department_id",
             },
@@ -417,8 +438,47 @@ function updateEmployeeRoles() {
                         console.log(err);
                     } else {
                         console.log(`Successfully updated to ${answers.id}. ${answers.title}`);
-                        mainMenu();
                     }
+                    mainMenu();
+                });
+        });
+}
+
+function updateDepartment() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Which department do you want to update?",
+                choices: departmentList,
+                name: "updatedDepartmentID",
+            },
+            {
+                type: "input",
+                message: "What is the UPDATED ID of the department?",
+                name: "id",
+            },
+            {
+                type: "input",
+                message: "What is the UPDATED name of the derpartment?",
+                name: "name",
+            },
+        ])
+        .then(answers => {
+            let updatedDepartment = {
+                id: answers.id,
+                name: answers.name
+            };
+            connection.query(
+                "UPDATE departments SET ? WHERE id = ?",
+                [updatedDepartment, answers.updatedDepartmentID],
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully updated to ${answers.id}. ${answers.name}`);
+                    }
+                    mainMenu();
                 });
         });
 }
