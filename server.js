@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
+require("console.table");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -44,11 +45,12 @@ function mainMenu() {
             switch (answers.action) {
                 case "View Departments":
                     viewDepartments();
-                    mainMenu();
                     break;
                 case "View Roles":
-                    // viewRoles();
-                    mainMenu();
+                    viewRoles();
+                    break;
+                case "View Employees":
+                    viewEmployees();
                     break;
                 default:
                     connection.end();
@@ -56,26 +58,38 @@ function mainMenu() {
         });
 }
 
-function searchSong() {
-    inquirer
-        .prompt([
-            {
-                type: "input",
-                message: "What song would you like to search up?",
-                name: "song",
-            },
-        ])
-        .then(answers => {
-            var query = connection.query("SELECT * FROM top5000 WHERE song = ?", answers.song, function (err, res) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log(res);
-                    // const item = res.find((songInfo) => songInfo.song === answers.song);
-                    // console.log(`${item.song}: Position - ${item.position}, Artist - ${item.artist}, Year - ${item.year}`);
-                    mainMenu();
-                }
-            }
-            );
-        });
+function viewDepartments() {
+    connection.query("SELECT * FROM departments", function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("");
+            console.table(res);
+            mainMenu();
+        }
+    });
+}
+
+function viewRoles() {
+    connection.query("SELECT * FROM roles", function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("");
+            console.table(res);
+            mainMenu();
+        }
+    });
+}
+
+function viewEmployees() {
+    connection.query("SELECT * FROM employees", function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("");
+            console.table(res);
+            mainMenu();
+        }
+    });
 }
