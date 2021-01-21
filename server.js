@@ -3,8 +3,9 @@ const mysql = require("mysql");
 require("console.table");
 
 let managerList = [];
-var departmentList = [];
+let departmentList = [];
 let roleList = [];
+let employeeList = [];
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -26,6 +27,7 @@ function mainMenu() {
     updateDepartmentList();
     updateManagerList();
     updateRoleList();
+    updateEmployeeList();
     inquirer
         .prompt([
             {
@@ -45,6 +47,7 @@ function mainMenu() {
                     "Add Department",
                     "Add Role",
                     "Add Employee",
+                    "Update Employee",
                     "Update Employee Roles",
                     "EXIT"],
                 name: "action",
@@ -69,6 +72,9 @@ function mainMenu() {
                     break;
                 case "Add Employee":
                     addEmployee();
+                    break;
+                case "Update Employee":
+                    updateEmployee();
                     break;
                 case "Update Employee Roles":
                     updateEmployeeRoles();
@@ -178,7 +184,22 @@ function updateRoleList() {
         }
     });
 }
-// updateRoleList();
+function updateEmployeeList() {
+    connection.query("SELECT * FROM employees", function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            employeeList = [];
+            res.forEach(element => {
+                let employee = {
+                    name: `${element.id}. ${element.first_name} ${element.last_name} - Role ID: ${element.role_id} - Manager ID: ${element.manager_id}`,
+                    value: element.id
+                };
+                employeeList.push(employee);
+            });
+        }
+    });
+}
 
 function updateManagerList() {
     connection.query("SELECT * FROM managers", function (err, res) {
@@ -292,6 +313,64 @@ function addEmployee() {
         });
 }
 
+function updateEmployee() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Which employee do you want to update?",
+                choices: employeeList,
+                name: "updatedEmployeeID",
+            },
+            {
+                type: "input",
+                message: "What is the new ID of the employee?",
+                name: "id",
+            },
+            {
+                type: "input",
+                message: "What is the UPDATED first name of the employee?",
+                name: "first_name",
+            },
+            {
+                type: "input",
+                message: "What is the UPDATED last name of the employee?",
+                name: "last_name",
+            },
+            {
+                type: "list",
+                message: "What is the UPDATED role ID of the employee?",
+                choices: roleList,
+                name: "role_id",
+            },
+            {
+                type: "list",
+                message: "What is the UPDATED manager ID of the employee?",
+                choices: managerList,
+                name: "manager_id",
+            },
+        ])
+        .then(answers => {
+            let updatedEmployee = {
+                id: answers.id,
+                first_name: answers.first_name,
+                last_name: answers.last_name,
+                role_id: answers.role_id,
+                manager_id: answers.manager_id
+            };
+            connection.query(
+                "UPDATE employees SET ? WHERE id = ?",
+                [updatedEmployee, answers.updatedEmployeeID],
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully updated to ${answers.id}. ${answers.first_name} ${answers.last_name} - Role ID: ${answers.role_id} - Manager ID: ${answers.manager_id}`);
+                        mainMenu();
+                    }
+                });
+        });
+}
 function updateEmployeeRoles() {
     inquirer
         .prompt([
