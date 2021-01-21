@@ -70,6 +70,9 @@ function mainMenu() {
                 case "Add Employee":
                     addEmployee();
                     break;
+                case "Update Employee Roles":
+                    updateEmployeeRoles();
+                    break;
                 default:
                     connection.end();
             }
@@ -128,16 +131,16 @@ function addDepartment() {
         ])
         .then(answers => {
             connection.query(
-                "INSERT INTO departments SET ?", 
+                "INSERT INTO departments SET ?",
                 answers,
                 function (err, res) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
-                    mainMenu();
-                }
-            });
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
+                        mainMenu();
+                    }
+                });
         });
 }
 
@@ -183,7 +186,7 @@ function updateManagerList() {
             console.log(err);
         } else {
             managerList = [];
-            if(res.length < 1) {
+            if (res.length < 1) {
                 let manager = {
                     name: "No Manager",
                     value: null
@@ -230,16 +233,16 @@ function addRole() {
         ])
         .then(answers => {
             connection.query(
-                "INSERT INTO roles SET ?", 
+                "INSERT INTO roles SET ?",
                 answers,
                 function (err, res) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
-                    mainMenu();
-                }
-            });
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
+                        mainMenu();
+                    }
+                });
         });
 }
 
@@ -276,15 +279,67 @@ function addEmployee() {
         ])
         .then(answers => {
             connection.query(
-                "INSERT INTO employees SET ?", 
+                "INSERT INTO employees SET ?",
                 answers,
                 function (err, res) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
-                    mainMenu();
-                }
-            });
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully logged ${answers.department} with ID of ${answers.id}`);
+                        mainMenu();
+                    }
+                });
+        });
+}
+
+function updateEmployeeRoles() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Which role do you want to update?",
+                choices: roleList,
+                name: "updatedRoleID",
+            },
+            {
+                type: "input",
+                message: "What is the new ID of the role?",
+                name: "id",
+            },
+            {
+                type: "input",
+                message: "What is the new title of the role?",
+                name: "title",
+            },
+            {
+                type: "input",
+                message: "What is the new salary of the role?",
+                name: "salary",
+            },
+            {
+                type: "list",
+                message: "What is the new department ID of the role?",
+                choices: departmentList,
+                name: "department_id",
+            },
+        ])
+        .then(answers => {
+            let updatedRole = {
+                id: answers.id,
+                title: answers.title,
+                salary: answers.salary,
+                department_id: answers.department_id
+            };
+            connection.query(
+                "UPDATE roles SET ? WHERE id = ?",
+                [updatedRole, answers.updatedRoleID],
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully updated to ${answers.id}. ${answers.title}`);
+                        mainMenu();
+                    }
+                });
         });
 }
