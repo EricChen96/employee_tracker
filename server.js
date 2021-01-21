@@ -2,6 +2,10 @@ const inquirer = require("inquirer");
 const mysql = require("mysql");
 require("console.table");
 
+let managerList = [];
+var departmentList = [];
+let roleList = [];
+
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -14,9 +18,14 @@ connection.connect((err) => {
     console.log("connected");
     mainMenu();
 });
+
+
 // function main menu:
 function mainMenu() {
     // prompt user choice for post, bid, or exit
+    updateDepartmentList();
+    updateManagerList();
+    updateRoleList();
     inquirer
         .prompt([
             {
@@ -35,7 +44,7 @@ function mainMenu() {
                     "View Employees",
                     "Add Department",
                     "Add Role",
-                    "Add Employees",
+                    "Add Employee",
                     "Update Employee Roles",
                     "EXIT"],
                 name: "action",
@@ -131,7 +140,8 @@ function addDepartment() {
             });
         });
 }
-let departmentList = [];
+
+
 function updateDepartmentList() {
     connection.query("SELECT * FROM departments", function (err, res) {
         if (err) {
@@ -149,8 +159,51 @@ function updateDepartmentList() {
     });
 }
 
+function updateRoleList() {
+    connection.query("SELECT * FROM roles", function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            roleList = [];
+            res.forEach(element => {
+                let role = {
+                    name: `${element.id}. ${element.title} - Salary: $${element.salary} - Department ID: ${element.department_id}`,
+                    value: element.id
+                };
+                roleList.push(role);
+            });
+        }
+    });
+}
+// updateRoleList();
+
+function updateManagerList() {
+    connection.query("SELECT * FROM managers", function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            managerList = [];
+            if(res.length < 1) {
+                let manager = {
+                    name: "No Manager",
+                    value: null
+                };
+                managerList.push(manager);
+            }
+            else {
+                res.forEach(element => {
+                    let manager = {
+                        name: `${element.id}. ${element.first_name} ${element.last_name}`,
+                        value: element.id
+                    };
+                    managerList.push(manager);
+                });
+            }
+        }
+    });
+}
+
 function addRole() {
-    updateDepartmentList();
     inquirer
         .prompt([
             {
@@ -189,6 +242,7 @@ function addRole() {
             });
         });
 }
+
 function addEmployee() {
     inquirer
         .prompt([
@@ -208,20 +262,21 @@ function addEmployee() {
                 name: "last_name",
             },
             {
-                type: "input",
-                message: "What is the salary of the new role?",
-                name: "salary",
+                type: "list",
+                message: "What is the role of the employee?",
+                choices: roleList,
+                name: "role_id",
             },
             {
                 type: "list",
-                message: "What is the department ID of the new role?",
-                choices: departmentList,
-                name: "department_id",
+                message: "What is the manager ID of the new role?",
+                choices: managerList,
+                name: "manager_id",
             },
         ])
         .then(answers => {
             connection.query(
-                "INSERT INTO roles SET ?", 
+                "INSERT INTO employees SET ?", 
                 answers,
                 function (err, res) {
                 if (err) {

@@ -22,6 +22,15 @@ CREATE TABLE roles (
     department_id INT NOT NULL
 );
 
+CREATE TABLE managers (
+    id INT PRIMARY KEY NOT NULL,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL
+);
+
+INSERT INTO managers (id, first_name, last_name)
+VALUES (1, "John", "Wick");
+
 INSERT INTO departments (id, name)
 VALUES (1, "accounting"), (2, "factory"), (3, "marketing");
 
