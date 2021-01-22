@@ -4,6 +4,7 @@
 ![employee_tracker](./employee_tracker_screenshot.png)
 
 [Link to Github repository](https://github.com/EricChen96/employee_tracker) <br>
+[Link to video](https://www.youtube.com/watch?v=VYLSAFX2JLY&feature=youtu.be) <br>
 
 ## Description
 The following code create an app that allows the user to access a mySQL database to access data on employees, roles, and departments. The user can view tables, add to the tables, update tables, and delete tables. 
