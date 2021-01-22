@@ -13,7 +13,8 @@ CREATE TABLE employees (
     last_name VARCHAR(30) NOT NULL,
     role_id INT NOT NULL,
     manager_id INT,
-    foreign key (manager_id) REFERENCES employees(id)
+    FOREIGN KEY (manager_id)
+        REFERENCES employees (id)
 );
 
 CREATE TABLE roles (
@@ -23,8 +24,38 @@ CREATE TABLE roles (
     department_id INT NOT NULL
 );
 
-SELECT e.first_name, e.last_name, CONCAT(m.first_name," ", m.last_name) AS manager FROM employees AS e LEFT JOIN employees AS m ON
-e.manager_id = m.id;
+-- View Employees with everything 
+SELECT 
+    e.id,
+    e.first_name,
+    e.last_name,
+    r.title,
+    d.name AS department,
+    r.salary,
+    CONCAT(m.first_name, " ", m.last_name) AS manager    
+FROM
+    employees AS e
+        LEFT JOIN
+    roles AS r ON e.role_id = r.id
+		LEFT JOIN
+	departments AS d ON r.department_id = d.id
+		LEFT JOIN
+	employees AS m ON e.manager_id = m.id;
+
+-- View roles with department
+SELECT r.id, r.title, d.name AS department, r.salary FROM roles AS r LEFT JOIN departments AS d ON r.department_id = d.id;
+
+-- Example for showing a table referencing another
+SELECT 
+    e.first_name,
+    e.last_name,
+    CONCAT(m.first_name, ' ', m.last_name) AS manager
+FROM
+    employees AS e
+        LEFT JOIN
+    employees AS m ON e.manager_id = m.id;
+
+
 
 INSERT INTO departments (id, name)
 VALUES (1, "accounting"), (2, "factory"), (3, "marketing");

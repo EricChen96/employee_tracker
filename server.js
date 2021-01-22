@@ -33,13 +33,8 @@ function mainMenu() {
                 type: "list",
                 message: "What would you like to do?",
                 choices: [
-                    // "View All Employees",
                     // "View All Employees by Department",
                     // "View All Employees by Manager",
-                    // "Add Employee",
-                    // "Remove Employee",
-                    // "Update Employee",
-                    // "Update Employee Role",
                     "View Departments",
                     "View Roles",
                     "View Employees",
@@ -51,6 +46,7 @@ function mainMenu() {
                     "Update Department",
                     "Update Employee Roles",
                     "Update Employee",
+                    "Remove Employee",
                     "EXIT"],
                 name: "action",
             },
@@ -109,7 +105,7 @@ function viewDepartments() {
 }
 
 function viewRoles() {
-    connection.query("SELECT * FROM roles", function (err, res) {
+    connection.query(`SELECT r.id, r.title, d.name AS department, r.salary FROM roles AS r LEFT JOIN departments AS d ON r.department_id = d.id;`, function (err, res) {
         if (err) {
             console.log(err);
         } else {
@@ -122,7 +118,21 @@ function viewRoles() {
 // SELECT e.first_name, e.last_name, CONCAT(m.first_name," ", m.last_name) AS manager FROM employees AS e 
 // LEFT JOIN employees AS m ON e.manager_id = m.id;
 function viewEmployees() {
-    connection.query("SELECT employees.id, employees.first_name, employees.last_name, employees.role_id,  FROM employees", function (err, res) {
+    connection.query(`SELECT e.id,
+    e.first_name,
+    e.last_name,
+    r.title,
+    d.name AS department,
+    r.salary,
+    CONCAT(m.first_name, " ", m.last_name) AS manager    
+FROM
+    employees AS e
+        LEFT JOIN
+    roles AS r ON e.role_id = r.id
+		LEFT JOIN
+	departments AS d ON r.department_id = d.id
+		LEFT JOIN
+	employees AS m ON e.manager_id = m.id`, function (err, res) {
         if (err) {
             console.log(err);
         } else {
