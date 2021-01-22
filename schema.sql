@@ -40,10 +40,42 @@ FROM
 		LEFT JOIN
 	departments AS d ON r.department_id = d.id
 		LEFT JOIN
-	employees AS m ON e.manager_id = m.id;
+	employees AS m ON e.manager_id = m.id
+        ORDER BY e.id;
+
+-- View employees by roles
+SELECT 
+    r.id,
+    r.title,
+    e.id,
+    e.first_name,
+    e.last_name,
+    CONCAT(m.first_name, " ", m.last_name) AS manager    
+FROM
+    employees AS e
+        LEFT JOIN
+    roles AS r ON e.role_id = r.id
+		LEFT JOIN
+	departments AS d ON r.department_id = d.id
+        ORDER BY r.id
+
+-- View Employees by Department
+SELECT 
+    d.id,
+    d.name AS department,
+    e.id,
+    e.first_name,
+    e.last_name    
+FROM
+    employees AS e
+        LEFT JOIN
+    roles AS r ON e.role_id = r.id
+		LEFT JOIN
+	departments AS d ON r.department_id = d.id
+        ORDER BY d.id
 
 -- View roles with department
-SELECT r.id, r.title, d.name AS department, r.salary FROM roles AS r LEFT JOIN departments AS d ON r.department_id = d.id;
+SELECT r.id, r.title, d.name AS department, r.salary FROM roles AS r LEFT JOIN departments AS d ON r.department_id = d.id ORDER BY r.id;
 
 -- Example for showing a table referencing another
 SELECT 

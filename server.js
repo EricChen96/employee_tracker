@@ -33,13 +33,12 @@ function mainMenu() {
                 type: "list",
                 message: "What would you like to do?",
                 choices: [
-                    // "View All Employees by Department",
-                    // "View All Employees by Manager",
                     "View Departments",
                     "View Roles",
                     "View Employees",
                     "View Employees By Roles",
                     "View Employees By Departments",
+                    "View Employees By Managers",
                     "Add Department",
                     "Add Role",
                     "Add Employee",
@@ -65,9 +64,12 @@ function mainMenu() {
                 case "View Employees By Roles":
                     viewEmployeesByRoles();
                     break;
-                // case "View Employees By Departments":
-                //     viewEmployeesByDepartments();
-                //     break;
+                case "View Employees By Departments":
+                    viewEmployeesByDepartments();
+                    break;
+                case "View Employees By Managers":
+                    viewEmployeesByManagers();
+                    break;
                 case "Add Department":
                     addDepartment();
                     break;
@@ -105,7 +107,7 @@ function viewDepartments() {
 }
 
 function viewRoles() {
-    connection.query(`SELECT r.id, r.title, d.name AS department, r.salary FROM roles AS r LEFT JOIN departments AS d ON r.department_id = d.id;`, function (err, res) {
+    connection.query(`SELECT r.id, r.title, d.name AS department, r.salary FROM roles AS r LEFT JOIN departments AS d ON r.department_id = d.id ORDER BY r.id;`, function (err, res) {
         if (err) {
             console.log(err);
         } else {
@@ -118,7 +120,7 @@ function viewRoles() {
 // SELECT e.first_name, e.last_name, CONCAT(m.first_name," ", m.last_name) AS manager FROM employees AS e 
 // LEFT JOIN employees AS m ON e.manager_id = m.id;
 function viewEmployees() {
-    connection.query(`SELECT e.id,
+    connection.query(`SELECT e.id AS e_id,
     e.first_name,
     e.last_name,
     r.title,
@@ -132,7 +134,75 @@ FROM
 		LEFT JOIN
 	departments AS d ON r.department_id = d.id
 		LEFT JOIN
-	employees AS m ON e.manager_id = m.id`, function (err, res) {
+    employees AS m ON e.manager_id = m.id
+        ORDER BY e.id`, function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("");
+            console.table(res);
+        }
+        mainMenu();
+    });
+}
+
+function viewEmployeesByRoles() {
+    connection.query(`SELECT 
+    e.role_id AS r_id,
+    r.title,
+    e.id AS e_id,
+    e.first_name,
+    e.last_name
+FROM
+    employees AS e
+        LEFT JOIN
+    roles AS r ON e.role_id = r.id
+        ORDER BY e.role_id`, function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("");
+            console.table(res);
+        }
+        mainMenu();
+    });
+}
+function viewEmployeesByDepartments() {
+    connection.query(`SELECT 
+    r.department_id AS d_id,
+    d.name AS departments,
+    e.id AS e_id,
+    e.first_name,
+    e.last_name    
+FROM
+    employees AS e
+        LEFT JOIN
+    roles AS r ON e.role_id = r.id
+		LEFT JOIN
+	departments AS d ON r.department_id = d.id
+        ORDER BY r.department_id`, function (err, res) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("");
+            console.table(res);
+        }
+        mainMenu();
+    });
+}
+
+function viewEmployeesByManagers() {
+    connection.query(`SELECT 
+    e.manager_id AS m_id,
+    CONCAT(m.first_name, " ", m.last_name) AS manager,
+    e.id AS e_id,
+    e.first_name,
+    e.last_name
+FROM
+    employees AS e
+        LEFT JOIN
+    employees AS m ON e.manager_id = m.id
+        ORDER BY e.manager_id`, function (err, res) {
         if (err) {
             console.log(err);
         } else {
