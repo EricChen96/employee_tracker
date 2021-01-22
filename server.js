@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 require("console.table");
+const questions = require("./questions");
 
 let departmentList = [];
 let roleList = [];
@@ -27,30 +28,7 @@ function mainMenu() {
     updateRoleList();
     updateEmployeeList();
     inquirer
-        .prompt([
-            {
-                type: "list",
-                message: "What would you like to do?",
-                choices: [
-                    "View Departments",
-                    "View Roles",
-                    "View Employees",
-                    "View Employees By Roles",
-                    "View Employees By Departments",
-                    "View Employees By Managers",
-                    "Add Department",
-                    "Add Role",
-                    "Add Employee",
-                    "Update Department",
-                    "Update Employee Roles",
-                    "Update Employee",
-                    "Delete Department",
-                    "Delete Role",
-                    "Delete Employee",
-                    "EXIT"],
-                name: "action",
-            },
-        ])
+        .prompt(questions.mainMenuPrompt)
         .then(answers => {
             switch (answers.action) {
                 case "View Departments":
@@ -225,18 +203,7 @@ FROM
 
 function addDepartment() {
     inquirer
-        .prompt([
-            {
-                type: "input",
-                message: "What is the id of the department?",
-                name: "id",
-            },
-            {
-                type: "input",
-                message: "What is the name of the new department?",
-                name: "name",
-            },
-        ])
+        .prompt(questions.addDepartmentPrompt)
         .then(answers => {
             connection.query(
                 "INSERT INTO departments SET ?",
@@ -303,57 +270,15 @@ function updateEmployeeList() {
     });
 }
 
-// function updateManagerList() {
-//     connection.query("SELECT * FROM managers", function (err, res) {
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             managerList = [];
-//             if (res.length < 1) {
-//                 let manager = {
-//                     name: "No Manager",
-//                     value: null
-//                 };
-//                 managerList.push(manager);
-//             }
-//             else {
-//                 res.forEach(element => {
-//                     let manager = {
-//                         name: `${element.id}. ${element.first_name} ${element.last_name}`,
-//                         value: element.id
-//                     };
-//                     managerList.push(manager);
-//                 });
-//             }
-//         }
-//     });
-// }
-
 function addRole() {
+    let departmentChoice = {
+        type: "list",
+        message: "What is the department ID of the new role?",
+        choices: departmentList,
+        name: "department_id"
+    };
     inquirer
-        .prompt([
-            {
-                type: "input",
-                message: "What is the id of the role?",
-                name: "id",
-            },
-            {
-                type: "input",
-                message: "What is the title of the new role?",
-                name: "title",
-            },
-            {
-                type: "input",
-                message: "What is the salary of the new role?",
-                name: "salary",
-            },
-            {
-                type: "list",
-                message: "What is the department ID of the new role?",
-                choices: departmentList,
-                name: "department_id",
-            },
-        ])
+        .prompt([...questions.addRolePrompt, departmentChoice])
         .then(answers => {
             connection.query(
                 "INSERT INTO roles SET ?",
@@ -370,36 +295,21 @@ function addRole() {
 }
 
 function addEmployee() {
+    let addEmployeeListPrompts = [{
+        type: "list",
+        message: "What is the role of the employee?",
+        choices: roleList,
+        name: "role_id"
+    },
+    {
+        type: "list",
+        message: "What is the employee ID for the manager of the employee?",
+        choices: addNullManagerOption(employeeList),
+        name: "manager_id",
+    }];
+
     inquirer
-        .prompt([
-            {
-                type: "input",
-                message: "What is the id of the employee?",
-                name: "id",
-            },
-            {
-                type: "input",
-                message: "What is the first name of the employee?",
-                name: "first_name",
-            },
-            {
-                type: "input",
-                message: "What is the last name of the employee?",
-                name: "last_name",
-            },
-            {
-                type: "list",
-                message: "What is the role of the employee?",
-                choices: roleList,
-                name: "role_id",
-            },
-            {
-                type: "list",
-                message: "What is the employee ID for the manager of the employee?",
-                choices: addNullManagerOption(employeeList),
-                name: "manager_id",
-            },
-        ])
+        .prompt([...questions.addEmployeePrompt, ...addEmployeeListPrompts])
         .then(answers => {
             connection.query(
                 "INSERT INTO employees SET ?",
