@@ -24,7 +24,6 @@ connection.connect((err) => {
 function mainMenu() {
     // prompt user choice for post, bid, or exit
     updateDepartmentList();
-    // updateManagerList();
     updateRoleList();
     updateEmployeeList();
     inquirer
@@ -45,7 +44,9 @@ function mainMenu() {
                     "Update Department",
                     "Update Employee Roles",
                     "Update Employee",
-                    "Remove Employee",
+                    "Delete Department",
+                    "Delete Role",
+                    "Delete Employee",
                     "EXIT"],
                 name: "action",
             },
@@ -87,6 +88,15 @@ function mainMenu() {
                     break;
                 case "Update Employee":
                     updateEmployee();
+                    break;
+                case "Delete Department":
+                    deleteDepartment();
+                    break;
+                case "Delete Role":
+                    deleteRole();
+                    break;
+                case "Delete Employee":
+                    deleteEmployee();
                     break;
                 default:
                     connection.end();
@@ -557,6 +567,81 @@ function updateDepartment() {
                         console.log(err);
                     } else {
                         console.log(`Successfully updated to ${answers.id}. ${answers.name}`);
+                    }
+                    mainMenu();
+                });
+        });
+}
+
+function deleteDepartment() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Which department do you want to delete?",
+                choices: departmentList,
+                name: "deletedDepartmentID",
+            }
+        ])
+        .then(answers => {
+            connection.query(
+                "DELETE FROM departments WHERE id = ?",
+                [answers.deletedDepartmentID],
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully deleted`);
+                    }
+                    mainMenu();
+                });
+        });
+}
+
+function deleteRole() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Which role do you want to delete?",
+                choices: roleList,
+                name: "deletedRoleID",
+            }
+        ])
+        .then(answers => {
+            connection.query(
+                "DELETE FROM roles WHERE id = ?",
+                [answers.deletedRoleID],
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully deleted`);
+                    }
+                    mainMenu();
+                });
+        });
+}
+
+function deleteEmployee() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Which employee do you want to delete?",
+                choices: employeeList,
+                name: "deletedEmployeeID",
+            }
+        ])
+        .then(answers => {
+            connection.query(
+                "DELETE FROM employees WHERE id = ?",
+                [answers.deletedEmployeeID],
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully deleted`);
                     }
                     mainMenu();
                 });
